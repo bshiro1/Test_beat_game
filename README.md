@@ -72,7 +72,7 @@ Each map lists three separate downloads so no media is redistributed here: the *
      Replace the PASTE_..._LINK_HERE placeholders with your URLs.
      ============================================================ -->
 
-### Map 1 — _[Map / Song Title]_
+### Map 1 — _[No Sleep]_
 
 - **Difficulty:** Normal 
 - **Mapper:** Me - bshiro
