@@ -78,6 +78,14 @@
   .pm-settings label{display:flex;justify-content:space-between;align-items:center;gap:18px;margin:12px 0;font-family:'Orbitron';font-size:11px;letter-spacing:1px;color:#9fc0d4}
   .pm-settings input[type=range]{flex:1;max-width:220px;accent-color:var(--cyan)}
   .pm-val{min-width:44px;text-align:right;color:var(--cyan)}
+  .cm-slots{display:flex;flex-direction:column;gap:10px}
+  .cm-slot{display:flex;align-items:center;gap:14px;padding:12px 14px;border:1px solid rgba(0,229,240,.25);background:rgba(0,229,240,.03);clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px)}
+  .cm-slot .cm-n{font-family:'Orbitron';font-weight:900;font-size:20px;color:var(--mag);width:26px;text-align:center;flex:0 0 auto}
+  .cm-slot .cm-info{flex:1;display:flex;flex-direction:column;min-width:0}
+  .cm-slot .cm-info b{font-family:'Orbitron';font-size:13px;letter-spacing:1px;color:#fff}
+  .cm-slot .cm-info span{font-size:13px;color:#8fb8cc;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .cm-slot.ok{border-color:var(--lime);background:rgba(57,255,20,.05)}
+  .cm-slot.ok .cm-info span{color:var(--lime)}
   #editor-screen .panel{width:min(1020px,96vw)}
   .edit-stage{position:relative;width:100%;aspect-ratio:16/9;margin:10px 0}
   #edit-canvas{width:100%;height:100%;cursor:none}
@@ -122,6 +130,7 @@
       <button class="btn" onclick="go('select')">&#9654; Play</button>
       <button class="btn mag" onclick="go('editor')">&#10010; Beatmap Creator</button>
       <button class="btn" onclick="startTutorial()">&#127891; Interactive Tutorial</button>
+      <button class="btn" onclick="go('community')">&#127760; Community Maps</button>
       <button class="btn ghost sm" onclick="go('help')">Note Types &amp; Controls</button>
     </div>
     <div style="position:absolute;bottom:16px;font-size:12px;color:#4a5a76;letter-spacing:2px">NO ACCOUNT &middot; RUNS OFFLINE &middot; v2.1</div>
@@ -197,6 +206,20 @@
     </div>
   </section>
 
+  <section id="community-screen" class="screen">
+    <div class="panel">
+      <div class="row between"><div><h2>COMMUNITY MAP</h2><div class="sub">Load a shared map from its 3 files</div></div><button class="btn ghost sm" onclick="go('menu')">&#10005; Back</button></div>
+      <p class="hint" style="margin:6px 0 14px">Get the song, the beatmap <b>.json</b>, and the background from a map's links (see the README), then drop all three in below and play. Nothing is uploaded &mdash; every file stays on your device.</p>
+      <label class="fld" style="margin-bottom:12px">MAP TITLE<input type="text" id="cm-title" placeholder="Map title (optional)" style="max-width:340px"></label>
+      <div class="cm-slots">
+        <div class="cm-slot"><div class="cm-n">1</div><div class="cm-info"><b>&#127925; Music</b><span id="cm-music-s">No file &mdash; required</span></div><label class="btn mag sm" style="display:inline-block">Choose<input type="file" id="cm-music" accept="audio/*" class="hidden"></label></div>
+        <div class="cm-slot"><div class="cm-n">2</div><div class="cm-info"><b>&#128196; Beatmap (.json)</b><span id="cm-json-s">No file &mdash; required</span></div><label class="btn mag sm" style="display:inline-block">Choose<input type="file" id="cm-json" accept="application/json,.json" class="hidden"></label></div>
+        <div class="cm-slot"><div class="cm-n">3</div><div class="cm-info"><b>&#128444; Background (image / video)</b><span id="cm-bg-s">No file &mdash; optional</span></div><label class="btn ghost sm" style="display:inline-block">Choose<input type="file" id="cm-bg" accept="image/*,video/*" class="hidden"></label></div>
+      </div>
+      <div class="row" style="margin-top:18px"><button class="btn" onclick="cmPlay()">&#9654; Play Map</button><button class="btn ghost" onclick="cmSave()">&#128190; Save to Library</button></div>
+    </div>
+  </section>
+
   <section id="editor-screen" class="screen">
     <div class="panel">
       <div class="row between"><div><h2>BEATMAP CREATOR</h2><div class="sub">Load music &middot; place notes &middot; set a background &middot; save &amp; play</div></div><button class="btn ghost sm" onclick="go('menu')">&#10005; Back</button></div>
@@ -225,7 +248,7 @@
 <script>
 "use strict";
 /* ================= NEON BEATS v2.1 ================= */
-const screens=["menu","help","select","game","results","editor"];
+const screens=["menu","help","select","community","game","results","editor"];
 function go(name){
   if(name!=="game") stopGame();
   if(name!=="editor") editStop();
@@ -750,6 +773,13 @@ function editTest(){ if(!E.buffer||!E.notes.length){alert("Add some notes first.
 function editSaveSession(){ if(!E.buffer||!E.notes.length){alert("Add some notes first.");return;} E.id=E.id||("map_"+Date.now()); audioStore[E.id]=E.buffer; if(E.bg)bgStore[E.id]=E.bg; const rec={id:E.id,title:E.title,approach:E.approach,notes:E.notes,bg:E.bg||null,bgKind:E.bgKind}; let maps=loadCustomMaps().filter(m=>m.id!==E.id); maps.push(rec); try{ saveCustomMaps(maps); alert('Saved "'+E.title+'" to your library.'); }catch(err){ const stripped=maps.map(m=>({...m,bg:null})); try{ saveCustomMaps(stripped); alert('Saved "'+E.title+'" — but the background was too large to store permanently, so it applies only this session.'); }catch(e2){ alert("Couldn't save to browser storage (quota full)."); } } renderSongList(); }
 function editExport(){ const data={title:E.title,approach:E.approach,notes:E.notes,bg:E.bg||null,bgKind:E.bgKind,format:"neonbeats-v2"}; const blob=new Blob([JSON.stringify(data)],{type:"application/json"}); const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=(E.title||"beatmap").replace(/[^\w\-]+/g,"_")+".nbmap.json"; a.click(); }
 function fmt(s){ s=Math.max(0,s||0); const m=Math.floor(s/60),ss=Math.floor(s%60); return m+":"+String(ss).padStart(2,"0"); }
+const CM={buffer:null,notes:null,approach:850,title:"",bg:null,bgKind:"image",bgEl:null};
+function cmStatus(id,txt){ const el=document.getElementById(id); if(el){ el.textContent=txt; const slot=el.closest(".cm-slot"); if(slot)slot.classList.add("ok"); } }
+document.getElementById("cm-music").addEventListener("change",async e=>{ const f=e.target.files[0]; if(!f)return; try{ CM.buffer=await audio().decodeAudioData((await f.arrayBuffer()).slice(0)); }catch(err){ alert("Could not decode that audio file."); return; } const ti=document.getElementById("cm-title"); if(!ti.value.trim())ti.value=f.name.replace(/\.[^.]+$/,""); cmStatus("cm-music-s",f.name); });
+document.getElementById("cm-json").addEventListener("change",e=>{ const f=e.target.files[0]; if(!f)return; const r=new FileReader(); r.onload=()=>{ try{ const m=JSON.parse(r.result); CM.notes=(m.notes||[]).map(n=>({...n})); CM.approach=m.approach||850; const ti=document.getElementById("cm-title"); if(m.title&&!ti.value.trim())ti.value=m.title; if(m.bg&&!CM.bg){ CM.bg=m.bg; CM.bgKind=m.bgKind||"image"; buildBgEl(CM.bg,CM.bgKind).then(el=>CM.bgEl=el); cmStatus("cm-bg-s","(loaded from map file)"); } cmStatus("cm-json-s",f.name+"  ·  "+CM.notes.length+" notes"); }catch(err){ alert("Invalid beatmap JSON."); } }; r.readAsText(f); });
+document.getElementById("cm-bg").addEventListener("change",e=>{ const f=e.target.files[0]; if(!f)return; const kind=f.type.startsWith("video")?"video":"image"; const r=new FileReader(); r.onload=()=>{ CM.bg=r.result; CM.bgKind=kind; buildBgEl(r.result,kind).then(el=>CM.bgEl=el); cmStatus("cm-bg-s",f.name); }; r.readAsDataURL(f); });
+function cmPlay(){ if(!CM.buffer){ alert("Load the music file (slot 1) first."); return; } if(!CM.notes||!CM.notes.length){ alert("Load the beatmap .json file (slot 2)."); return; } const title=document.getElementById("cm-title").value.trim()||"Community Map"; startGame({name:title,diff:"CUSTOM",type:"audio",buffer:CM.buffer,approach:CM.approach,circles:CM.notes.map(n=>({...n})),bg:CM.bg,bgKind:CM.bgKind,duration:CM.buffer.duration*1000+1800}); }
+function cmSave(){ if(!CM.buffer||!CM.notes||!CM.notes.length){ alert("Load the music and the beatmap .json first."); return; } const id="map_"+Date.now(); audioStore[id]=CM.buffer; if(CM.bg)bgStore[id]=CM.bg; const title=document.getElementById("cm-title").value.trim()||"Community Map"; const rec={id,title,approach:CM.approach,notes:CM.notes,bg:CM.bg||null,bgKind:CM.bgKind}; let maps=loadCustomMaps(); maps.push(rec); try{ saveCustomMaps(maps); alert('Saved "'+title+'" to your library. It\'s in the Play menu.'); }catch(err){ try{ saveCustomMaps(maps.map(m=>({...m,bg:null}))); alert('Saved "'+title+'" — background too large to store permanently, so it applies this session only.'); }catch(e2){ alert("Couldn't save to browser storage (quota full)."); } } }
 document.addEventListener("click",()=>{ if(AC&&AC.state==="suspended")AC.resume(); });
 </script>
 </body>
