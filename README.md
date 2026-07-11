@@ -72,12 +72,12 @@ Each map lists three separate downloads so no media is redistributed here: the *
      Replace the PASTE_..._LINK_HERE placeholders with your URLs.
      ============================================================ -->
 
-### Map 1 — _[Map / Song Title]_
+### Map 1 — _[No Sleep]_
 
-- **Difficulty:** _Easy / Normal / Hard_
-- **Mapper:** _your name_
+- **Difficulty:** Normal 
+- **Mapper:** Me - bshiro
 - 🎵 **Song (download from source):** [https://pixabay.com/music/beats-no-sleep-hiphop-music-473847/] — Artist: kontraa – Title: No Sleep | Hiphop Music, via Pixabay_
-- 📄 **Beatmap file (.json):** [within the basic files you download called (kontraa-no-sleep-hiphop-music-473847.nbmap.json)]
+- 📄 **Beatmap file (.json):** [within the basic files you download called (kontraa-no-sleep-hiphop-music-473847.nbmap.json)] - Made by: bshiro
 - 🖼️ **Background image / video (download):** [https://pixabay.com/videos/seoul-hangang-river-yeouido-336755/] - Creator: YounStudios - Title: Seoul, hangang river, yeouido free stock video. Free for use & download.
 
 ### Map 2 — _[Map / Song Title]_
